@@ -6,7 +6,7 @@ use std::{
     sync::{Arc, Mutex, OnceLock, RwLock},
 };
 
-use tauri::{Manager, Window};
+use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayMenu, Window};
 
 mod config;
 mod file_handler;
@@ -68,7 +68,29 @@ fn change_config(
 fn main() -> anyhow::Result<()> {
     let program_config = Arc::new(RwLock::new(config::ProgramConfig::load()?));
 
+    let quit = CustomMenuItem::new("quit", "Quit");
+    let tray_menu = SystemTrayMenu::new().add_item(quit);
+
+    let tray = SystemTray::new().with_menu(tray_menu);
+
     tauri::Builder::default()
+        .system_tray(tray)
+        .on_system_tray_event(|app, event| match event {
+            tauri::SystemTrayEvent::MenuItemClick { id, .. } => {
+                if id == "quit" {
+                    app.exit(0);
+                }
+            }
+            tauri::SystemTrayEvent::LeftClick { .. } => {
+                let window = app.get_window("main").unwrap();
+                if window.is_visible().unwrap() {
+                    window.hide().unwrap();
+                } else {
+                    window.show().unwrap();
+                }
+            }
+            _ => {}
+        })
         .setup(|app| {
             let window = app.get_window("main").unwrap();
             _ = WINDOW.set(window);
