@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "SaveScum",
-    "version": "0.0.3"
+    "version": "0.0.4"
   },
   "tauri": {
     "systemTray": {
@@ -15,18 +15,13 @@
       "iconAsTemplate": true
     },
     "allowlist": {
-      "all": true,
+      "all": false,
       "shell": {
         "all": false,
         "open": true
       },
       "dialog": {
-        "all": false,
-        "ask": false,
-        "confirm": true,
-        "message": true,
-        "open": true,
-        "save": false
+        "all": true
       }
     },
     "windows": [
