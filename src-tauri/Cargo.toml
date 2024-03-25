@@ -1,0 +1,23 @@
+[package]
+name = "savescum"
+version = "0.0.0"
+description = "Allow save scumming in games that don't allow multiple save states"
+authors = ["Devin Bidwell <dbidwell94@biddydev.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
+[dependencies]
+tauri = { version = "1", features = ["shell-open"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+notify = { version = "6.1.1" }
+directories = "5.0.1"
+anyhow = "1.0.81"
+
+[features]
+# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]
