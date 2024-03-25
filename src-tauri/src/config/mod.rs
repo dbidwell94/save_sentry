@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::DIRS;
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct ProgramConfig {
@@ -9,10 +11,7 @@ pub struct ProgramConfig {
 
 impl ProgramConfig {
     pub fn load() -> anyhow::Result<Self> {
-        let project_dir = directories::ProjectDirs::from("", "Biddydev", "SaveScum")
-            .ok_or_else(|| anyhow::anyhow!("Could not find config directory"))?;
-
-        let config_path = project_dir.config_dir().join("config.json");
+        let config_path = DIRS.config_dir().join("config.json");
         println!("Loading config at {:?}", config_path);
         let config: anyhow::Result<ProgramConfig> = match std::fs::read_to_string(config_path) {
             Ok(s) => Ok(serde_json::from_str::<ProgramConfig>(&s)?),
@@ -31,9 +30,7 @@ impl ProgramConfig {
     }
 
     pub fn save(&self) -> anyhow::Result<()> {
-        let project_dir = directories::ProjectDirs::from("", "Biddydev", "SaveScum")
-            .ok_or_else(|| anyhow::anyhow!("Could not find config directory"))?;
-        let config_path = project_dir.config_dir().join("config.json");
+        let config_path = DIRS.config_dir().join("config.json");
         let config_str = serde_json::to_string_pretty(&self)?;
 
         // check if directory exists. If not, create it recursively

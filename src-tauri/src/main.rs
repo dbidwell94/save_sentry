@@ -3,15 +3,22 @@
 
 use std::{
     path::Path,
-    sync::{Mutex, OnceLock},
+    sync::{Arc, Mutex, OnceLock, RwLock},
 };
 
 use tauri::{Manager, Window};
 
 mod config;
+mod file_handler;
 mod file_listener;
 
+lazy_static::lazy_static! {
+    pub static ref DIRS: directories::ProjectDirs = directories::ProjectDirs::from("", "Biddydev", "SaveScum").unwrap();
+}
+
 pub static WINDOW: OnceLock<Window> = OnceLock::new();
+
+type ConfigState = Arc<RwLock<config::ProgramConfig>>;
 
 #[tauri::command]
 fn add_game(
@@ -43,25 +50,24 @@ fn add_game(
 }
 
 #[tauri::command]
-fn get_config(
-    config: tauri::State<'_, Mutex<config::ProgramConfig>>,
-) -> Result<config::ProgramConfig, String> {
-    Ok(config.lock().map_err(|e| e.to_string())?.clone())
+fn get_config(config: tauri::State<'_, ConfigState>) -> Result<config::ProgramConfig, String> {
+    Ok(config.read().map_err(|e| e.to_string())?.clone())
 }
 
 #[tauri::command]
 fn change_config(
-    current_config: tauri::State<'_, Mutex<config::ProgramConfig>>,
+    current_config: tauri::State<'_, ConfigState>,
     new_config: config::ProgramConfig,
 ) -> Result<(), String> {
-    let mut config = current_config.lock().map_err(|e| e.to_string())?;
+    let mut config = current_config.write().map_err(|e| e.to_string())?;
     *config = new_config;
     config.save().map_err(|e| e.to_string())?;
     Ok(())
 }
 
 fn main() -> anyhow::Result<()> {
-    let program_config = config::ProgramConfig::load()?;
+    let program_config = Arc::new(RwLock::new(config::ProgramConfig::load()?));
+
     tauri::Builder::default()
         .setup(|app| {
             let window = app.get_window("main").unwrap();
@@ -73,7 +79,7 @@ fn main() -> anyhow::Result<()> {
             get_config,
             change_config
         ])
-        .manage(Mutex::new(program_config.clone()))
+        .manage(program_config.clone())
         .manage(Mutex::new(file_listener::FileWatcher::new(program_config)?))
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

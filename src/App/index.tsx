@@ -5,6 +5,7 @@ import Navbar from "./Navbar";
 import { getConfg } from "@api/index";
 import { useAppDispatch } from "@src/store";
 import { updateGames } from "@state/configReducer";
+import { listen } from "@tauri-apps/api/event";
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -12,6 +13,23 @@ export default function App() {
     getConfg().then((config) => {
       void dispatch(updateGames(config));
     });
+  }, []);
+
+  useEffect(() => {
+    let unlisten: Awaited<ReturnType<typeof listen>> | undefined = undefined;
+    (async () => {
+      unlisten = await listen("configUpdated", () => {
+        getConfg().then((config) => {
+          void dispatch(updateGames(config));
+        });
+      });
+    })();
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
   }, []);
 
   return (
