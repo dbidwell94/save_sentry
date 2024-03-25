@@ -1,7 +1,20 @@
-import { useAppSelector } from "@src/store";
+import { useAppDispatch, useAppSelector } from "@src/store";
 import Input from "../Input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../Button";
+import { setGameModalOpen } from "@src/store/modalReducer";
+import * as yup from "yup";
+import { addNewGame, openFolderPicker } from "@src/api";
+import { listen, Event } from "@tauri-apps/api/event";
+
+const formSchema = yup.object().shape({
+  gameName: yup.string().required("Game name is required"),
+  gamePath: yup.string().required("Game path is required"),
+  maxSaveBackups: yup
+    .number()
+    .min(1, "A minimum of 1 save backup is required")
+    .required("Max save backups is required"),
+});
 
 interface FormValues {
   gameName: string;
@@ -9,10 +22,67 @@ interface FormValues {
   maxSaveBackups: number;
 }
 
+const initialFormValues: FormValues = {
+  gameName: "",
+  gamePath: "",
+  maxSaveBackups: 0,
+};
+
 export default function AddGameModal() {
   const { createGameModalOpen } = useAppSelector((state) => state.modals);
+  const dispatch = useAppDispatch();
 
-  const [formValues, setFormValues] = useState();
+  const [formValues, setFormValues] = useState(initialFormValues);
+
+  useEffect(() => {
+    let unlisten: Awaited<ReturnType<typeof listen>> | undefined;
+    (async () => {
+      unlisten = await listen(
+        "selected_folder",
+        ({ payload }: Event<string | null>) => {
+          if (payload) {
+            setFormValues((prev) => ({
+              ...prev,
+              gamePath: payload,
+            }));
+          }
+        }
+      );
+    })();
+
+    return () => {
+      unlisten?.();
+    };
+  }, []);
+
+  function onChange(evt: React.ChangeEvent<HTMLFormElement>) {
+    evt.preventDefault();
+    const { name, value } = evt.target;
+
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
+  async function onSubmit(evt: React.FormEvent<HTMLFormElement>) {
+    console.log("submitting");
+    evt.preventDefault();
+    try {
+      await formSchema.validate(formValues, { abortEarly: false });
+    } catch (err) {
+      const error = err as yup.ValidationError;
+      console.error(error);
+    }
+
+    await addNewGame(
+      formValues.gameName,
+      formValues.gamePath,
+      Number(formValues.maxSaveBackups)
+    );
+
+    dispatch(setGameModalOpen(false));
+  }
 
   return (
     <div
@@ -22,25 +92,55 @@ export default function AddGameModal() {
           : "bg-opacity-0 pointer-events-none"
       }`}
     >
-      <section className="min-w-40 h-auto border rounded-lg p-5 lg:p-20">
+      <section
+        className={`min-w-40 max-w-96 h-auto border rounded-lg p-5 lg:p-20 ${
+          createGameModalOpen ? "visible" : "hidden"
+        }`}
+      >
         <h1 className="text-white border-b mb-5">Add Game</h1>
         <form
           className="flex flex-col gap-2"
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={onSubmit}
+          onChange={onChange}
         >
-          <Input placeholder="Game Name" />
-          <Input placeholder="Max Save Backups" type="number" min={0} />
-
           <Input
-            placeholder="Game Path"
-            type="file"
-            directory
-            webkitdirectory
-            multiple
+            placeholder="Game Name"
+            name="gameName"
+            value={formValues.gameName}
           />
+          <Input
+            placeholder="Max Save Backups"
+            type="number"
+            min={1}
+            name="maxSaveBackups"
+            value={formValues.maxSaveBackups}
+          />
+
+          <section className="w-full flex flex-col my-4 max-w-full">
+            <Button
+              onClick={async (e) => {
+                e.preventDefault();
+                await openFolderPicker();
+              }}
+            >
+              Choose save folder
+            </Button>
+            {formValues.gamePath && (
+              <code className="text-white truncate">{formValues.gamePath}</code>
+            )}
+          </section>
+
           <div className="flex gap-2 justify-center">
             <Button type="submit">Add</Button>
-            <Button>Cancel</Button>
+            <Button
+              onClick={(evt) => {
+                evt.preventDefault();
+                setFormValues(initialFormValues);
+                dispatch(setGameModalOpen(false));
+              }}
+            >
+              Cancel
+            </Button>
           </div>
         </form>
       </section>

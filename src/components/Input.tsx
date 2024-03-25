@@ -7,8 +7,8 @@ type NativeInputProps = React.DetailedHTMLProps<
 
 type InputProps = Omit<NativeInputProps, "className"> & {
   labelText?: string;
-  directory?: boolean;
-  webkitdirectory?: boolean;
+  directory?: boolean | string;
+  webkitdirectory?: boolean | string;
 };
 
 const Input = forwardRef<HTMLInputElement, InputProps>(

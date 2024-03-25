@@ -20,3 +20,7 @@ export async function addNewGame(
     maxSaveBackups,
   });
 }
+
+export async function openFolderPicker() {
+  return await invoke("open_folder_browser");
+}
