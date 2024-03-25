@@ -1,6 +1,16 @@
-# Tauri + React + Typescript
+# SaveScum
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+## Description
+Ever had a game that is limited to only one save file, and that save file gets corrupted and immediately backed up by Steam? Yeah, me too (thanks, Dragon's Dogma 2!)
+That's why I set out to create `SaveScum`, a program which you can configure to watch your save file directories. When a change has been detected by `SaveScum`, the save is automatically backed up in a seperate location. The amount of backups is configurable for each game that you which to backup. 
+
+Did your save file get corrupted? Whelp, that sucks. But fret not: just quit the game, restore your save from `SaveScum`, load up, and game on!
+
+## TODO
+- Visual config editor
+- Use GUI to restore save files
+- Better UI
+- (Stretch) able to run `SaveScum` in the background without showing a window
 
 ## Recommended IDE Setup
 
