@@ -1,8 +1,6 @@
 import GameOverview from "@src/components/GameOverview";
 import classes from "./index.module.less";
 import { useAppSelector } from "@src/store";
-import { useMemo } from "react";
-import { GameConfig } from "@src/store/configReducer";
 
 export default function GameView() {
   const { games } = useAppSelector((state) => state.config);
