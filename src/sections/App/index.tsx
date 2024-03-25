@@ -6,6 +6,7 @@ import { getConfg } from "@api/index";
 import { useAppDispatch } from "@src/store";
 import { updateGames } from "@state/configReducer";
 import { listen } from "@tauri-apps/api/event";
+import AddGameModal from "@src/components/AddGameModal";
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -33,7 +34,8 @@ export default function App() {
   }, []);
 
   return (
-    <div className="w-full h-full bg-slate-800 flex flex-col justify-between">
+    <div className="w-full h-full bg-slate-800 flex flex-col justify-between relative">
+      <AddGameModal />
       <Navbar />
       <GameView />
       <Footer />

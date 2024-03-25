@@ -1,6 +1,6 @@
 [package]
 name = "savescum"
-version = "0.0.0"
+version = "0.0.3"
 description = "Allow save scumming in games that don't allow multiple save states"
 authors = ["Devin Bidwell <dbidwell94@biddydev.com>"]
 edition = "2021"
@@ -11,7 +11,9 @@ edition = "2021"
 tauri-build = { version = "1", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = ["shell-open", "system-tray"] }
+tauri = { version = "1", features = [ "api-all",
+    "system-tray",
+] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 notify = { version = "6.1.1" }
@@ -20,6 +22,7 @@ anyhow = "1.0.81"
 debounce = "0.2.2"
 lazy_static = "1.4.0"
 chrono = "0.4.35"
+sha2 = "0.10.8"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

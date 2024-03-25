@@ -1,6 +1,7 @@
 import GameOverview from "@src/components/GameOverview";
 import classes from "./index.module.less";
 import { useAppSelector } from "@src/store";
+import AddNewGameButton from "@src/components/AddNewGameButton";
 
 export default function GameView() {
   const { games } = useAppSelector((state) => state.config);
@@ -8,6 +9,7 @@ export default function GameView() {
   return (
     <div className={` w-full h-full overflow-y-auto py-2 px-1`}>
       <section className={`grid gap-4 ${classes.gameGrid} h-auto w-full`}>
+        <AddNewGameButton />
         {Object.values(games).map((game) => (
           <GameOverview
             gameName={game.gameName}

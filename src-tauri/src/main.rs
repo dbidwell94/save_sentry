@@ -5,6 +5,7 @@ use std::{
     path::Path,
     sync::{Arc, Mutex, OnceLock, RwLock},
 };
+use tauri::api::dialog;
 
 use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayMenu, Window};
 
@@ -25,8 +26,9 @@ fn add_game(
     game_name: String,
     save_folder_path: String,
     max_save_backups: u32,
-    config: tauri::State<'_, Mutex<config::ProgramConfig>>,
+    config: tauri::State<'_, ConfigState>,
     file_watcher: tauri::State<'_, Mutex<file_listener::FileWatcher>>,
+    window: tauri::Window,
 ) -> Result<(), String> {
     file_watcher
         .lock()
@@ -41,10 +43,16 @@ fn add_game(
         save_files: vec![],
     };
 
-    let mut config = config.lock().map_err(|e| e.to_string())?;
+    let mut config = config.write().map_err(|e| e.to_string())?;
 
     config.games.insert(game_name, game_config);
-    config.save().unwrap();
+    config
+        .save()
+        .map_err(|_| "Failed to save config".to_string())?;
+
+    window
+        .emit("configUpdated", ())
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -58,18 +66,31 @@ fn get_config(config: tauri::State<'_, ConfigState>) -> Result<config::ProgramCo
 fn change_config(
     current_config: tauri::State<'_, ConfigState>,
     new_config: config::ProgramConfig,
+    window: tauri::Window,
 ) -> Result<(), String> {
     let mut config = current_config.write().map_err(|e| e.to_string())?;
     *config = new_config;
     config.save().map_err(|e| e.to_string())?;
+    window
+        .emit("configUpdated", ())
+        .map_err(|e| e.to_string())?;
     Ok(())
+}
+
+#[tauri::command]
+fn open_folder_browser(window: tauri::Window) {
+    dialog::FileDialogBuilder::default().pick_folder(move |path| {
+        println!("Selected path: {:?}", path);
+        _ = window.emit("selected_folder", path);
+    });
 }
 
 fn main() -> anyhow::Result<()> {
     let program_config = Arc::new(RwLock::new(config::ProgramConfig::load()?));
 
     let quit = CustomMenuItem::new("quit", "Quit");
-    let tray_menu = SystemTrayMenu::new().add_item(quit);
+    let toggle_show = CustomMenuItem::new("toggle_show", "Restore/Hide");
+    let tray_menu = SystemTrayMenu::new().add_item(toggle_show).add_item(quit);
 
     let tray = SystemTray::new().with_menu(tray_menu);
 
@@ -80,26 +101,35 @@ fn main() -> anyhow::Result<()> {
                 if id == "quit" {
                     app.exit(0);
                 }
-            }
-            tauri::SystemTrayEvent::LeftClick { .. } => {
-                let window = app.get_window("main").unwrap();
-                if window.is_visible().unwrap() {
-                    window.hide().unwrap();
-                } else {
-                    window.show().unwrap();
+                if id == "toggle_show" {
+                    let window = app.get_window("main").unwrap();
+                    if window.is_visible().unwrap() {
+                        window.hide().unwrap();
+                    } else {
+                        window.show().unwrap();
+                    }
                 }
+            }
+            _ => {}
+        })
+        .on_window_event(|evt| match evt.event() {
+            tauri::WindowEvent::CloseRequested { api, .. } => {
+                api.prevent_close();
+                evt.window().hide().unwrap();
             }
             _ => {}
         })
         .setup(|app| {
             let window = app.get_window("main").unwrap();
             _ = WINDOW.set(window);
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             add_game,
             get_config,
-            change_config
+            change_config,
+            open_folder_browser
         ])
         .manage(program_config.clone())
         .manage(Mutex::new(file_listener::FileWatcher::new(program_config)?))
