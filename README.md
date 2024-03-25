@@ -7,10 +7,10 @@ That's why I set out to create `SaveScum`, a program which you can configure to 
 Did your save file get corrupted? Whelp, that sucks. But fret not: just quit the game, restore your save from `SaveScum`, load up, and game on!
 
 ## TODO
-- Visual config editor
-- Use GUI to restore save files
-- Better UI
-- (Stretch) able to run `SaveScum` in the background without showing a window
+- [ ] Visual config editor
+- [ ] Use GUI to restore save files
+- [ ] Better UI
+- [ ] (Stretch) able to run `SaveScum` in the background without showing a window
 
 ## Recommended IDE Setup
 
