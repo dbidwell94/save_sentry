@@ -12,14 +12,16 @@ impl FileWatcher {
             notify::recommended_watcher(move |result: Result<notify::Event, notify::Error>| {
                 let evt = result.unwrap();
 
-                match evt.kind {
-                    notify::EventKind::Any => todo!(),
-                    notify::EventKind::Access(_) => todo!(),
-                    notify::EventKind::Create(e) => println!("Create: {e:?}"),
-                    notify::EventKind::Modify(e) => println!("Modify: {e:?}"),
-                    notify::EventKind::Remove(e) => println!("Remove: {e:?}"),
-                    notify::EventKind::Other => todo!(),
-                }
+                println!("{:?}: {:?}", evt.kind, evt.paths);
+
+                // match evt.kind {
+                //     notify::EventKind::Any => todo!(),
+                //     notify::EventKind::Access(_) => todo!(),
+                //     notify::EventKind::Create(e) => println!("Create: {e:?}"),
+                //     notify::EventKind::Modify(e) => println!("Modify: {e:?}"),
+                //     notify::EventKind::Remove(e) => println!("Remove: {e:?}"),
+                //     notify::EventKind::Other => todo!(),
+                // }
             })?;
 
         for game in config.games.values() {

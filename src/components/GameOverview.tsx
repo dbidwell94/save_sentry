@@ -1,10 +1,11 @@
 type GameOverviewProps = {
   gameName: string;
   totalSaveFiles: number;
-  lastFileSavedAt: Date;
+  lastFileSavedAt?: Date;
 };
 
 export default function GameOverview(props: GameOverviewProps) {
+  console.log(props);
   return (
     <div className="border h-fit p-5 rounded-md flex flex-col content-center justify-center">
       <h4 className="text-gray-300 text-lg font-bold text-center">
@@ -14,7 +15,7 @@ export default function GameOverview(props: GameOverviewProps) {
         {props.totalSaveFiles} save files
       </p>
       <p className="text-gray-400 text-sm text-center">
-        Last saved at -- <code>{props.lastFileSavedAt.toLocaleString()}</code>
+        Last saved at -- <code>{props.lastFileSavedAt?.toLocaleString()}</code>
       </p>
     </div>
   );

@@ -3,10 +3,15 @@ import Footer from "./Footer";
 import GameView from "./GameView";
 import Navbar from "./Navbar";
 import { getConfg } from "@api/index";
+import { useAppDispatch } from "@src/store";
+import { updateGames } from "@state/configReducer";
 
 export default function App() {
+  const dispatch = useAppDispatch();
   useEffect(() => {
-    getConfg().then(console.log);
+    getConfg().then((config) => {
+      void dispatch(updateGames(config));
+    });
   }, []);
 
   return (
