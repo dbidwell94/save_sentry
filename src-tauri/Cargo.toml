@@ -11,7 +11,13 @@ edition = "2021"
 tauri-build = { version = "1", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [ "dialog-confirm", "dialog-message", "dialog-open", "shell-open", "system-tray"] }
+tauri = { version = "1", features = [
+    "dialog-confirm",
+    "dialog-message",
+    "dialog-open",
+    "shell-open",
+    "system-tray",
+] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 notify = { version = "6.1.1" }
@@ -20,6 +26,7 @@ anyhow = "1.0.81"
 debounce = "0.2.2"
 lazy_static = "1.4.0"
 chrono = "0.4.35"
+sha2 = "0.10.8"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
