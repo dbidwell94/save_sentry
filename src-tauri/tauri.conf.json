@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "savescum",
-    "version": "0.0.1"
+    "productName": "SaveScum",
+    "version": "0.0.2"
   },
   "tauri": {
     "systemTray": {
@@ -23,7 +23,7 @@
     },
     "windows": [
       {
-        "title": "savescum",
+        "title": "SaveScum",
         "width": 800,
         "height": 600
       }
