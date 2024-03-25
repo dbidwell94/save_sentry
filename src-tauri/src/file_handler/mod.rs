@@ -91,20 +91,23 @@ pub fn backup_directory(
         .map(|entry| entry.expect("DirEntry not valid").path())
         .collect();
 
+    // sort the folders by date modified
+    folders.sort_by_key(|f| {
+        std::fs::metadata(f)
+            .expect("Unable to read file metadata")
+            .modified()
+            .expect("Unable to get modified time")
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("Unable to get duration since epoch")
+    });
+
     // check if the count is at or above the max save backups
     if folders.len() >= max_save_backups as usize {
-        // sort the folders by date modified
-        folders.sort_by_key(|f| {
-            std::fs::metadata(f)
-                .expect("Unable to read file metadata")
-                .modified()
-                .expect("Unable to get modified time")
-                .duration_since(std::time::UNIX_EPOCH)
-                .expect("Unable to get duration since epoch")
-        });
-
         // remove the oldest folder
         std::fs::remove_dir_all(&folders[0])?;
+
+        // remove the oldest save file from the `folders` list
+        folders.remove(0);
 
         // remove the oldest save file from the config
         _ = config
