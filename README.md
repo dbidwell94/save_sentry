@@ -7,6 +7,7 @@ That's why I set out to create `SaveScum`, a program which you can configure to 
 Did your save file get corrupted? Whelp, that sucks. But fret not: just quit the game, restore your save from `SaveScum`, load up, and game on!
 
 ## TODO
+- [ ] Add system to calculate hash of save folder to avoid unneeded duplicated saves
 - [ ] Visual config editor
 - [ ] Use GUI to restore save files
 - [ ] Better UI
