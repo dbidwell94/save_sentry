@@ -69,7 +69,8 @@ fn main() -> anyhow::Result<()> {
     let program_config = Arc::new(RwLock::new(config::ProgramConfig::load()?));
 
     let quit = CustomMenuItem::new("quit", "Quit");
-    let tray_menu = SystemTrayMenu::new().add_item(quit);
+    let toggle_show = CustomMenuItem::new("toggle_show", "Restore/Hide");
+    let tray_menu = SystemTrayMenu::new().add_item(toggle_show).add_item(quit);
 
     let tray = SystemTray::new().with_menu(tray_menu);
 
@@ -80,15 +81,22 @@ fn main() -> anyhow::Result<()> {
                 if id == "quit" {
                     app.exit(0);
                 }
-            }
-            tauri::SystemTrayEvent::LeftClick { .. } => {
-                let window = app.get_window("main").unwrap();
-                if window.is_visible().unwrap() {
-                    window.hide().unwrap();
-                } else {
-                    window.show().unwrap();
+                if id == "toggle_show" {
+                    let window = app.get_window("main").unwrap();
+                    if window.is_visible().unwrap() {
+                        window.hide().unwrap();
+                    } else {
+                        window.show().unwrap();
+                    }
                 }
             }
+            _ => {}
+        })
+        .on_window_event(|evt| match evt.event() {
+            tauri::WindowEvent::CloseRequested { api, .. } => {
+                api.prevent_close();
+                evt.window().hide().unwrap();
+            },
             _ => {}
         })
         .setup(|app| {

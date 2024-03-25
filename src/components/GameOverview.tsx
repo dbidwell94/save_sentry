@@ -1,3 +1,5 @@
+import GameOverviewContainer from "./GameOverviewContainer";
+
 type GameOverviewProps = {
   gameName: string;
   totalSaveFiles: number;
@@ -5,9 +7,8 @@ type GameOverviewProps = {
 };
 
 export default function GameOverview(props: GameOverviewProps) {
-  console.log(props);
   return (
-    <div className="border h-fit p-5 rounded-md flex flex-col content-center justify-center">
+    <GameOverviewContainer>
       <h4 className="text-gray-300 text-lg font-bold text-center">
         {props.gameName}
       </h4>
@@ -17,6 +18,6 @@ export default function GameOverview(props: GameOverviewProps) {
       <p className="text-gray-400 text-sm text-center">
         Last saved at -- <code>{props.lastFileSavedAt?.toLocaleString()}</code>
       </p>
-    </div>
+    </GameOverviewContainer>
   );
 }
