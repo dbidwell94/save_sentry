@@ -1,6 +1,6 @@
 [package]
 name = "savescum"
-version = "0.0.5"
+version = "0.0.6"
 description = "Allow save scumming in games that don't allow multiple save states"
 authors = ["Devin Bidwell <dbidwell94@biddydev.com>"]
 edition = "2021"
@@ -11,7 +11,7 @@ edition = "2021"
 tauri-build = { version = "1", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [ "dialog-all", "shell-open",
+tauri = { version = "1", features = [ "updater", "dialog-all", "shell-open",
     "system-tray",
 ] }
 serde = { version = "1", features = ["derive"] }
