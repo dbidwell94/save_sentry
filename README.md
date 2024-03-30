@@ -1,4 +1,4 @@
-# SaveScum
+# SaveSentry
 
 ## Description
 Ever had a game that is limited to only one save file, and that save file gets corrupted and immediately backed up by Steam? Yeah, me too (thanks, Dragon's Dogma 2!)
