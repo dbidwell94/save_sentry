@@ -17,14 +17,13 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-type Hasher = CoreWrapper<
+pub type Hasher = CoreWrapper<
     CtVariableCoreWrapper<
         Sha256VarCore,
         UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>,
         Sha256,
     >,
 >;
-
 pub type Hash = GenericArray<u8, UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>>;
 
 pub fn calculate_directory_checksum_recursive(

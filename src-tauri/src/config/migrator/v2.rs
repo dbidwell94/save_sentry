@@ -1,13 +1,11 @@
-use std::collections::HashMap;
-
+use super::Migrator;
 use crate::{
-    file_handler::{calculate_directory_checksum_recursive, Hash},
+    file_handler::{calculate_directory_checksum_recursive, Hash, Hasher},
     DIRS,
 };
-
-use super::Migrator;
-use serde::{ser::SerializeStruct, Deserialize, Serialize, Serializer};
+use serde::{ser::SerializeStruct, Deserialize, Serialize};
 use sha2::Digest;
+use std::collections::HashMap;
 
 pub const CONFIG_VERSION: u32 = 2;
 
@@ -108,15 +106,17 @@ impl<'de> serde::de::Visitor<'de> for SaveFileMetadataVisitor {
 
         let created_at = created_at.ok_or_else(|| serde::de::Error::missing_field("createdAt"))?;
         let save_id = save_id.ok_or_else(|| serde::de::Error::missing_field("saveId"))?;
-        let hash: Hash = hash
+        let hash = hash
             .map(|val| BASE64_STANDARD.decode(val))
             .ok_or_else(|| serde::de::Error::missing_field("hash"))?
             .map_err(serde::de::Error::custom)?;
 
+        // let hash_bytes = hash.bytes();
+
         Ok(SaveFileMetadata {
             created_at,
             save_id,
-            hash,
+            hash: Hash::clone_from_slice(hash.as_slice()),
         })
     }
 }
@@ -145,7 +145,7 @@ impl Migrator<super::v1::ProgramConfig> for ProgramConfig {
                 (
                     k,
                     GameConfig {
-                        game_name: v.game_name,
+                        game_name: v.game_name.clone(),
                         save_folder_path: v.save_folder_path,
                         max_save_backups: v.max_save_backups,
                         save_files: v
@@ -156,7 +156,7 @@ impl Migrator<super::v1::ProgramConfig> for ProgramConfig {
                                 let save_file_path =
                                     DIRS.data_dir().join(&v.game_name).join(&metadata.save_id);
 
-                                let hasher = Hasher::default();
+                                let mut hasher = Hasher::default();
                                 _ = calculate_directory_checksum_recursive(
                                     &save_file_path,
                                     &mut hasher,
