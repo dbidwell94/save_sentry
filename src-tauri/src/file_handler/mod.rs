@@ -1,3 +1,7 @@
+use crate::{
+    config::{ProgramConfig, SaveFileMetadata},
+    DIRS,
+};
 use sha2::{
     digest::{
         consts::{B0, B1},
@@ -13,11 +17,6 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use crate::{
-    config::{ProgramConfig, SaveFileMetadata},
-    DIRS,
-};
-
 type Hasher = CoreWrapper<
     CtVariableCoreWrapper<
         Sha256VarCore,
@@ -26,9 +25,9 @@ type Hasher = CoreWrapper<
     >,
 >;
 
-type Hash = GenericArray<u8, UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>>;
+pub type Hash = GenericArray<u8, UInt<UInt<UInt<UInt<UInt<UInt<UTerm, B1>, B0>, B0>, B0>, B0>, B0>>;
 
-fn calculate_directory_checksum_recursive(
+pub fn calculate_directory_checksum_recursive(
     directory: &Path,
     hasher: &mut Hasher,
 ) -> anyhow::Result<()> {
@@ -180,6 +179,10 @@ pub fn backup_directory(
 
     copy_recursive(root_dir, &save_dir)?;
 
+    let mut hasher = Hasher::default();
+    calculate_directory_checksum_recursive(&save_dir, &mut hasher)?;
+    let hash = hasher.finalize();
+
     // lock program config
     config
         .games
@@ -189,14 +192,19 @@ pub fn backup_directory(
         .push(SaveFileMetadata {
             created_at: chrono::Local::now().to_rfc2822(),
             save_id: now,
-            updated_at: chrono::Local::now().to_rfc2822(),
+            hash,
         });
 
-    config.save().unwrap();
+    config.save()?;
     crate::WINDOW
         .get()
         .ok_or_else(|| anyhow::anyhow!("Window not initialized"))?
         .emit("configUpdated", ())?;
 
     Ok(())
+}
+
+/// Restore a save directory to the game's save directory.
+pub fn restore_save_directory(root_dir: &Path) -> anyhow::Result<()> {
+    todo!()
 }

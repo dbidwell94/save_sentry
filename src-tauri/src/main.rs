@@ -40,6 +40,7 @@ fn add_game(
         game_name: game_name.clone(),
         save_folder_path,
         max_save_backups,
+        watcher_enabled: true,
         save_files: vec![],
     };
 
@@ -86,7 +87,9 @@ fn open_folder_browser(window: tauri::Window) {
 }
 
 fn main() -> anyhow::Result<()> {
-    let program_config = Arc::new(RwLock::new(config::ProgramConfig::load()?));
+    let program_config = Arc::new(RwLock::new(
+        config::ConfigVersion::load()?.perform_migrations()?,
+    ));
 
     let quit = CustomMenuItem::new("quit", "Quit");
     let toggle_show = CustomMenuItem::new("toggle_show", "Restore/Hide");
