@@ -14,8 +14,8 @@ export default function GameView() {
           <GameOverview
             gameName={game.gameName}
             lastFileSavedAt={
-              game.saveFiles[game.saveFiles.length - 1]?.updatedAt
-                ? new Date(game.saveFiles[game.saveFiles.length - 1]?.updatedAt)
+              game.saveFiles[game.saveFiles.length - 1]?.createdAt
+                ? new Date(game.saveFiles[game.saveFiles.length - 1]?.createdAt)
                 : undefined
             }
             totalSaveFiles={game.saveFiles.length}

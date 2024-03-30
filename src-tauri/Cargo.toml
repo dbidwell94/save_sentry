@@ -1,5 +1,5 @@
 [package]
-name = "savescum"
+name = "save_sentry"
 version = "0.1.0"
 description = "Allow save scumming in games that don't allow multiple save states"
 authors = ["Devin Bidwell <dbidwell94@biddydev.com>"]

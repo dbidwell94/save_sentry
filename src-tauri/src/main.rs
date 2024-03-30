@@ -14,7 +14,7 @@ mod file_handler;
 mod file_listener;
 
 lazy_static::lazy_static! {
-    pub static ref DIRS: directories::ProjectDirs = directories::ProjectDirs::from("", "Biddydev", "SaveScum").unwrap();
+    pub static ref DIRS: directories::ProjectDirs = directories::ProjectDirs::from("", "Biddydev", "SaveSentry").unwrap();
 }
 
 pub static WINDOW: OnceLock<Window> = OnceLock::new();

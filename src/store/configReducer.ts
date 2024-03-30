@@ -9,11 +9,13 @@ export type GameConfig = {
   saveFiles: SaveFileMetadata[];
   saveFolderPath: string;
   maxSaveBackups: number;
+  watcherEnabled: boolean;
 };
 
 export type SaveFileMetadata = {
   createdAt: string;
-  updatedAt: string;
+  saveId: string;
+  hash: string;
 };
 
 const initialState: ProgramConfig = {

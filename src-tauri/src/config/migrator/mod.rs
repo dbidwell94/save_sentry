@@ -3,11 +3,10 @@
 mod v1;
 mod v2;
 
+use crate::DIRS;
 use serde::Deserialize;
 use serde_json::Value;
 pub use v2::{GameConfig, ProgramConfig, SaveFileMetadata, CONFIG_VERSION};
-
-use crate::DIRS;
 
 pub enum ConfigVersion {
     V1(v1::ProgramConfig),
@@ -65,7 +64,7 @@ impl ConfigVersion {
             Ok(s) => Ok(serde_json::from_str::<ConfigVersion>(&s)?),
             Err(e) => {
                 if e.kind() == std::io::ErrorKind::NotFound {
-                    let default_config = v2::ProgramConfig::default();
+                    let default_config = ProgramConfig::default();
                     default_config.save()?;
                     let config = ConfigVersion::V2(default_config);
                     return Ok(config);
