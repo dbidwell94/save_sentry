@@ -5,7 +5,7 @@ type NativeButtonProps = React.DetailedHTMLProps<
   HTMLButtonElement
 >;
 
-type GameOverContainerProps = Omit<NativeButtonProps, "className"> & {};
+type GameOverContainerProps = Omit<NativeButtonProps, "className">;
 
 const GameOverviewContainer = forwardRef<
   HTMLButtonElement,
@@ -23,5 +23,7 @@ const GameOverviewContainer = forwardRef<
     </button>
   );
 });
+
+GameOverviewContainer.displayName = "GameOverviewContainer";
 
 export default GameOverviewContainer;

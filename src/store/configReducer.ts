@@ -1,24 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ProgramConfig } from "@src/tauriTypes/ProgramConfig";
 
-export type ProgramConfig = {
-  games: Record<string, GameConfig>;
-};
+type ConfigState = Omit<ProgramConfig, "configVersion">;
 
-export type GameConfig = {
-  gameName: string;
-  saveFiles: SaveFileMetadata[];
-  saveFolderPath: string;
-  maxSaveBackups: number;
-  watcherEnabled: boolean;
-};
-
-export type SaveFileMetadata = {
-  createdAt: string;
-  saveId: string;
-  hash: string;
-};
-
-const initialState: ProgramConfig = {
+const initialState: ConfigState = {
   games: {},
 };
 
@@ -27,7 +12,7 @@ export function createConfigSlice() {
     name: "config",
     initialState,
     reducers: {
-      updateGames(state, action: PayloadAction<ProgramConfig>) {
+      updateGames(state, action: PayloadAction<ConfigState>) {
         state.games = action.payload.games;
       },
     },

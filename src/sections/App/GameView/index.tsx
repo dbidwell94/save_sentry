@@ -12,6 +12,7 @@ export default function GameView() {
         <AddNewGameButton />
         {Object.values(games).map((game) => (
           <GameOverview
+            key={game.gameName}
             gameName={game.gameName}
             lastFileSavedAt={
               game.saveFiles[game.saveFiles.length - 1]?.createdAt

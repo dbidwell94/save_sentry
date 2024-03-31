@@ -5,7 +5,7 @@ type NativeButtonProps = React.DetailedHTMLProps<
   HTMLButtonElement
 >;
 
-type ButtonProps = Omit<NativeButtonProps, "className"> & {};
+type ButtonProps = Omit<NativeButtonProps, "className">;
 
 const Button = forwardRef<HTMLButtonElement, PropsWithChildren<ButtonProps>>(
   ({ children, ...buttonProps }, ref) => {
@@ -20,5 +20,7 @@ const Button = forwardRef<HTMLButtonElement, PropsWithChildren<ButtonProps>>(
     );
   }
 );
+
+Button.displayName = "Button";
 
 export default Button;

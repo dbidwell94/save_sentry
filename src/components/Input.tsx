@@ -6,13 +6,12 @@ type NativeInputProps = React.DetailedHTMLProps<
 >;
 
 type InputProps = Omit<NativeInputProps, "className"> & {
-  labelText?: string;
   directory?: boolean | string;
   webkitdirectory?: boolean | string;
 };
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ labelText, ...inputProps }, ref) => {
+  ({ ...inputProps }, ref) => {
     return (
       <input
         ref={ref}
@@ -22,5 +21,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     );
   }
 );
+
+Input.displayName = "Input";
 
 export default Input;
