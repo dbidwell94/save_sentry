@@ -37,17 +37,14 @@ export default function AddGameModal() {
   useEffect(() => {
     let unlisten: Awaited<ReturnType<typeof listen>> | undefined;
     (async () => {
-      unlisten = await listen(
-        "selected_folder",
-        ({ payload }: Event<string | null>) => {
-          if (payload) {
-            setFormValues((prev) => ({
-              ...prev,
-              gamePath: payload,
-            }));
-          }
+      unlisten = await listen("selected_folder", ({ payload }: Event<string | null>) => {
+        if (payload) {
+          setFormValues((prev) => ({
+            ...prev,
+            gamePath: payload,
+          }));
         }
-      );
+      });
     })();
 
     return () => {
@@ -75,11 +72,7 @@ export default function AddGameModal() {
       console.error(error);
     }
 
-    await addNewGame(
-      formValues.gameName,
-      formValues.gamePath,
-      Number(formValues.maxSaveBackups)
-    );
+    await addNewGame(formValues.gameName, formValues.gamePath, Number(formValues.maxSaveBackups));
 
     dispatch(setGameModalOpen(false));
   }
@@ -87,9 +80,7 @@ export default function AddGameModal() {
   return (
     <div
       className={`absolute w-full h-full flex justify-center items-center transition-all bg-slate-900 ${
-        createGameModalOpen
-          ? "bg-opacity-60"
-          : "bg-opacity-0 pointer-events-none"
+        createGameModalOpen ? "bg-opacity-60" : "bg-opacity-0 pointer-events-none"
       }`}
     >
       <section
@@ -98,16 +89,8 @@ export default function AddGameModal() {
         }`}
       >
         <h1 className="text-white border-b mb-5">Add Game</h1>
-        <form
-          className="flex flex-col gap-2"
-          onSubmit={onSubmit}
-          onChange={onChange}
-        >
-          <Input
-            placeholder="Game Name"
-            name="gameName"
-            value={formValues.gameName}
-          />
+        <form className="flex flex-col gap-2" onSubmit={onSubmit} onChange={onChange}>
+          <Input placeholder="Game Name" name="gameName" value={formValues.gameName} />
           <Input
             placeholder="Max Save Backups"
             type="number"
@@ -125,9 +108,7 @@ export default function AddGameModal() {
             >
               Choose save folder
             </Button>
-            {formValues.gamePath && (
-              <code className="text-white truncate">{formValues.gamePath}</code>
-            )}
+            {formValues.gamePath && <code className="text-white truncate">{formValues.gamePath}</code>}
           </section>
 
           <div className="flex gap-2 justify-center">
