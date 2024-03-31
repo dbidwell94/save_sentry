@@ -20,3 +20,11 @@ export async function addNewGame(gameName: string, saveFolderPath: string, maxSa
 export async function openFolderPicker() {
   return await invoke("open_folder_browser");
 }
+
+export async function restoreSaveFile(gameId: string, saveFileId: string) {
+  return await invoke("restore_save", { gameId, saveId: saveFileId });
+}
+
+export async function deleteSaveFile(gameId: string, saveFileId: string) {
+  return await invoke("delete_save", { gameId, saveId: saveFileId });
+}

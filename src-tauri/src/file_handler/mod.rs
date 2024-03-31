@@ -1,5 +1,6 @@
 use crate::{
     config::{ProgramConfig, SaveFileMetadata},
+    file_listener::FileWatcher,
     DIRS,
 };
 use sha2::{
@@ -13,7 +14,8 @@ use sha2::{
 };
 use std::{
     io::Read,
-    path::Path,
+    path::{Path, PathBuf},
+    str::FromStr,
     sync::{Arc, RwLock},
 };
 
@@ -118,33 +120,22 @@ pub fn backup_directory(
             .remove(0);
     }
 
-    let mut should_save = true;
+    // get hash of root dir
+    let mut hasher = Hasher::default();
+    calculate_directory_checksum_recursive(root_dir, &mut hasher)?;
+    let hash: Hash = hasher.finalize();
 
-    // get latest save folder (if any) and calculate the hash of the folder using calculate_directory_checksum_recursive
-    let latest_save: Option<Result<Hash, ()>> = folders.last().map(|f| {
-        let mut hasher = Hasher::default();
-        match calculate_directory_checksum_recursive(f, &mut hasher) {
-            Ok(_) => Ok(hasher.finalize()),
-            Err(_) => Err(()),
-        }
-    });
+    let current_game_config = config.games.get(game_name).ok_or_else(|| {
+        anyhow::anyhow!("Game config does not exist. This is an unexpected error")
+    })?;
 
-    match latest_save {
-        Some(Ok(latest_hash)) => {
-            // calculate the hash of the current directory
-            let mut hasher = Hasher::default();
-            calculate_directory_checksum_recursive(root_dir, &mut hasher)?;
-
-            // compare the two hashes
-            if hasher.finalize() == latest_hash {
-                should_save = false;
-            }
-        }
-        _ => {}
-    }
+    let should_save = !current_game_config
+        .save_files
+        .iter()
+        .any(|f| f.hash == hash);
 
     if !should_save {
-        println!("No changes detected. Skipping backup.");
+        println!("Save state detected as unchanged and/or already backed up. Skipping save.");
         return Ok(());
     }
 
@@ -204,6 +195,121 @@ pub fn backup_directory(
 }
 
 /// Restore a save directory to the game's save directory.
-pub fn restore_save_directory(root_dir: &Path) -> anyhow::Result<()> {
-    todo!()
+pub fn restore_save_directory(
+    program_config: &Arc<RwLock<ProgramConfig>>,
+    game_id: &str,
+    save_id: &str,
+    watcher: &mut FileWatcher,
+) -> anyhow::Result<()> {
+    let binding = program_config
+        .read()
+        .map_err(|_| anyhow::anyhow!("Unable to aquire read lock on program config"))?;
+    let config = binding
+        .games
+        .values()
+        .find(|g| g.id == game_id)
+        .ok_or(anyhow::anyhow!("gameId does not exist"))?;
+
+    let base_game_save_path = PathBuf::from_str(&config.save_folder_path)?;
+    let save_file = config
+        .save_files
+        .iter()
+        .find(|f| f.save_id == save_id)
+        .ok_or(anyhow::anyhow!("Save file not found"))?;
+
+    let save_to_restore_path = DIRS
+        .data_dir()
+        .join(&config.game_name)
+        .join(&save_file.save_id);
+
+    println!(
+        "Restoring save: {save_id} for game: {game_id} from {0:#?} to {1:#?}",
+        save_to_restore_path.as_os_str(),
+        base_game_save_path.as_os_str()
+    );
+
+    watcher.stop_watching(&base_game_save_path)?;
+
+    // remove all files and sub-directories in the base_game_save_path directory
+    if base_game_save_path.exists() {
+        for entry in std::fs::read_dir(&base_game_save_path)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_dir() {
+                std::fs::remove_dir_all(&path)?;
+            } else {
+                std::fs::remove_file(&path)?;
+            }
+        }
+    }
+
+    // copy all files from within the save_to_restore_path directory into the base_game_save_path directory.
+    fn copy_recursive(src: &Path, dest: &Path) -> anyhow::Result<()> {
+        if src.is_dir() {
+            if !dest.exists() {
+                std::fs::create_dir_all(dest)?;
+            }
+
+            for entry in std::fs::read_dir(src)? {
+                let entry = entry?;
+                let path = entry.path();
+                let new_dest = dest.join(
+                    path.file_name()
+                        .ok_or_else(|| anyhow::anyhow!("Unable to get file name"))?,
+                );
+                copy_recursive(&path, &new_dest)?;
+            }
+        } else {
+            std::fs::copy(src, dest)?;
+        }
+
+        Ok(())
+    }
+
+    copy_recursive(&save_to_restore_path, &base_game_save_path)?;
+
+    watcher.watch_new_game(&base_game_save_path)?;
+
+    Ok(())
+}
+
+pub fn delete_save(
+    program_config: &Arc<RwLock<ProgramConfig>>,
+    game_id: &str,
+    save_id: &str,
+) -> anyhow::Result<()> {
+    let mut config = program_config
+        .write()
+        .map_err(|_| anyhow::anyhow!("Unable to aquire write lock on program config"))?;
+
+    let (_, game) = config
+        .games
+        .iter_mut()
+        .find(|(_, g)| (**g).id == game_id)
+        .ok_or_else(|| anyhow::anyhow!("Game config does not exist. This is an unexpected error"))?;
+
+    let save_file_index = game
+        .save_files
+        .iter()
+        .position(|f| f.save_id == save_id)
+        .ok_or_else(|| anyhow::anyhow!("Save file not found"))?;
+
+    let save_file = game.save_files.remove(save_file_index);
+
+    let save_dir = DIRS
+        .data_dir()
+        .join(&game.game_name)
+        .join(&save_file.save_id);
+
+    if save_dir.exists() {
+        std::fs::remove_dir_all(&save_dir)?;
+    }
+
+    config.save()?;
+    crate::WINDOW
+        .get()
+        .ok_or_else(|| anyhow::anyhow!("Window not initialized"))?
+        .emit("configUpdated", ())?;
+
+    Ok(())
 }

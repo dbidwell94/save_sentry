@@ -63,13 +63,11 @@ export default function AddGameModal() {
   }
 
   async function onSubmit(evt: React.FormEvent<HTMLFormElement>) {
-    console.log("submitting");
     evt.preventDefault();
     try {
       await formSchema.validate(formValues, { abortEarly: false });
     } catch (err) {
-      const error = err as yup.ValidationError;
-      console.error(error);
+      /* empty */
     }
 
     await addNewGame(formValues.gameName, formValues.gamePath, Number(formValues.maxSaveBackups));
