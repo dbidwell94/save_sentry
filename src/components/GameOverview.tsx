@@ -1,9 +1,11 @@
 import GameOverviewContainer from "./GameOverviewContainer";
+import { CircleStackIcon } from "@heroicons/react/24/solid";
 
 type GameOverviewProps = {
   gameName: string;
   totalSaveFiles: number;
   lastFileSavedAt?: Date;
+  watcherEnabled?: boolean;
 };
 
 export default function GameOverview(props: GameOverviewProps) {
@@ -14,6 +16,10 @@ export default function GameOverview(props: GameOverviewProps) {
       <p className="text-gray-400 text-sm text-center">
         Last saved at -- <code>{props.lastFileSavedAt?.toLocaleString()}</code>
       </p>
+      <CircleStackIcon
+        color={props.watcherEnabled ? "green" : "red"}
+        className={`w-10 absolute bottom-0 right-0 ${props.watcherEnabled && "animate-pulse"}`}
+      />
     </GameOverviewContainer>
   );
 }

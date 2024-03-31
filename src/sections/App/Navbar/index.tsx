@@ -2,7 +2,7 @@ export default function Navbar() {
   return (
     <nav className="w-full h-auto py-1 px-10 border-b border-gray-400">
       <div className="flex flex-row justify-between">
-        <h1 className="text-orange-500 font-bold text-3xl">SaveSentry</h1>
+        <h1 className="text-cyan-400 font-bold text-3xl">Save Sentry</h1>
       </div>
     </nav>
   );

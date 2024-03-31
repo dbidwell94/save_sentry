@@ -25,7 +25,8 @@
       "@components/*": ["src/components/*"],
       "@api/*": ["src/api/*"],
       "@state/*": ["src/store/*"],
-      "@sections/*": ["src/sections/*"]
+      "@sections/*": ["src/sections/*"],
+      "@tauri/*": ["src/tauriTypes/*"]
     }
   },
   "include": ["src"],

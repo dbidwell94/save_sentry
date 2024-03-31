@@ -79,16 +79,16 @@ export default function AddGameModal() {
 
   return (
     <div
-      className={`absolute w-full h-full flex justify-center items-center transition-all bg-slate-900 ${
+      className={`absolute w-full h-full flex justify-center items-center transition-all z-10 bg-slate-900 ${
         createGameModalOpen ? "bg-opacity-60" : "bg-opacity-0 pointer-events-none"
       }`}
     >
       <section
-        className={`min-w-40 max-w-96 h-auto border rounded-lg p-5 lg:p-20 ${
+        className={`min-w-40 max-w-96 h-auto border rounded-lg p-5 lg:p-20 bg-slate-900 ${
           createGameModalOpen ? "visible" : "hidden"
         }`}
       >
-        <h1 className="text-white border-b mb-5">Add Game</h1>
+        <h1 className="text-white border-b mb-5 text-center text-xl font-bold">Add Game</h1>
         <form className="flex flex-col gap-2" onSubmit={onSubmit} onChange={onChange}>
           <Input placeholder="Game Name" name="gameName" value={formValues.gameName} />
           <Input

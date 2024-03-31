@@ -20,6 +20,7 @@ export default function GameView() {
                 : undefined
             }
             totalSaveFiles={game.saveFiles.length}
+            watcherEnabled={game.watcherEnabled}
           />
         ))}
       </section>

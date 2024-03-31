@@ -1,4 +1,4 @@
-import { ProgramConfig } from "@src/store/configReducer";
+import { ProgramConfig } from "@tauri/ProgramConfig";
 import { invoke } from "@tauri-apps/api";
 
 export async function getConfg(): Promise<ProgramConfig> {
