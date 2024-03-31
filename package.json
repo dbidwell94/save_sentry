@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "prepare": "husky",
-    "bindings:generate": "generateBindings.sh"
+    "bindings:generate": "./generateBindings.sh"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.3",
