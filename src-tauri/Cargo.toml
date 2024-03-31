@@ -11,7 +11,10 @@ edition = "2021"
 tauri-build = { version = "1", features = [] }
 
 [dependencies]
-tauri = { version = "1", features = [ "updater", "dialog-all", "shell-open",
+tauri = { version = "1", features = [
+    "updater",
+    "dialog-all",
+    "shell-open",
     "system-tray",
 ] }
 serde = { version = "1", features = ["derive"] }
@@ -24,6 +27,7 @@ lazy_static = "1.4.0"
 chrono = "0.4.35"
 sha2 = "0.10.8"
 base64 = "0.22.0"
+ts-rs = "8.1.0" # Generate typescript bindings
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

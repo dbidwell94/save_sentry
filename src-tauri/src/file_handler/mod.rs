@@ -85,9 +85,9 @@ pub fn backup_directory(
     let now = chrono::Local::now().timestamp().to_string();
 
     // get a list of all the folders in the game directory
-    let mut folders: Vec<_> = std::fs::read_dir(&game_dir)?
+    let mut folders = std::fs::read_dir(&game_dir)?
         .map(|entry| entry.expect("DirEntry not valid").path())
-        .collect();
+        .collect::<Vec<_>>();
 
     // sort the folders by date modified
     folders.sort_by_key(|f| {

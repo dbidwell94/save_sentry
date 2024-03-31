@@ -6,10 +6,12 @@ use crate::{
 use serde::{ser::SerializeStruct, Deserialize, Serialize};
 use sha2::Digest;
 use std::collections::HashMap;
+use ts_rs::TS;
 
 pub const CONFIG_VERSION: u32 = 2;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, TS)]
+#[ts(export_to = "src/config.ts")]
 #[serde(rename_all = "camelCase")]
 pub struct ProgramConfig {
     pub games: HashMap<String, GameConfig>,
@@ -25,7 +27,7 @@ impl Default for ProgramConfig {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct GameConfig {
     pub game_name: String,
@@ -35,10 +37,11 @@ pub struct GameConfig {
     pub watcher_enabled: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, TS)]
 pub struct SaveFileMetadata {
     pub created_at: String,
     pub save_id: String,
+    #[ts(type = "string")]
     pub hash: Hash,
 }
 
@@ -110,8 +113,6 @@ impl<'de> serde::de::Visitor<'de> for SaveFileMetadataVisitor {
             .map(|val| BASE64_STANDARD.decode(val))
             .ok_or_else(|| serde::de::Error::missing_field("hash"))?
             .map_err(serde::de::Error::custom)?;
-
-        // let hash_bytes = hash.bytes();
 
         Ok(SaveFileMetadata {
             created_at,
