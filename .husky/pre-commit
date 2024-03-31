@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+scriptLocation=$(readlink -f "$0")
+startDir=$(dirname "$scriptLocation")
+
+cd "$startDir/.."
+./generateBindings.sh
+
+npm run preCommit
