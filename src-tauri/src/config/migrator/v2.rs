@@ -11,7 +11,7 @@ use ts_rs::TS;
 pub const CONFIG_VERSION: u32 = 2;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, TS)]
-#[ts(export_to = "src/config.ts")]
+#[ts(export)]
 #[serde(rename_all = "camelCase")]
 pub struct ProgramConfig {
     pub games: HashMap<String, GameConfig>,
@@ -28,6 +28,7 @@ impl Default for ProgramConfig {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, TS)]
+#[ts(export)]
 #[serde(rename_all = "camelCase")]
 pub struct GameConfig {
     pub game_name: String,
@@ -38,10 +39,12 @@ pub struct GameConfig {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, TS)]
+#[ts(export)]
+#[ts(rename_all = "camelCase")]
 pub struct SaveFileMetadata {
     pub created_at: String,
     pub save_id: String,
-    #[ts(type = "string")]
+    #[ts(as = "String")]
     pub hash: Hash,
 }
 
