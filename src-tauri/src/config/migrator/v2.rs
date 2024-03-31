@@ -30,6 +30,7 @@ impl Default for ProgramConfig {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct GameConfig {
+    pub id: String,
     pub game_name: String,
     pub save_folder_path: String,
     pub max_save_backups: u32,
@@ -150,6 +151,7 @@ impl Migrator<super::v1::ProgramConfig> for ProgramConfig {
                         game_name: v.game_name.clone(),
                         save_folder_path: v.save_folder_path,
                         max_save_backups: v.max_save_backups,
+                        id: uuid::Uuid::new_v4().to_string(),
                         save_files: v
                             .save_files
                             .iter()

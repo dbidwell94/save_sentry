@@ -42,6 +42,7 @@ fn add_game(
         max_save_backups,
         watcher_enabled: true,
         save_files: vec![],
+        id: uuid::Uuid::new_v4().to_string(),
     };
 
     let mut config = config.write().map_err(|e| e.to_string())?;

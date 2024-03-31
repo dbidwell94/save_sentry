@@ -2,7 +2,7 @@ import { PropsWithChildren, forwardRef } from "react";
 
 type NativeButtonProps = React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
 
-type GameOverContainerProps = Omit<NativeButtonProps, "className">;
+export type GameOverContainerProps = Omit<NativeButtonProps, "className">;
 
 const GameOverviewContainer = forwardRef<HTMLButtonElement, PropsWithChildren<GameOverContainerProps>>(
   ({ children, ...buttonProps }, ref) => {
