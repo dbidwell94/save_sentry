@@ -37,17 +37,14 @@ export default function AddGameModal() {
   useEffect(() => {
     let unlisten: Awaited<ReturnType<typeof listen>> | undefined;
     (async () => {
-      unlisten = await listen(
-        "selected_folder",
-        ({ payload }: Event<string | null>) => {
-          if (payload) {
-            setFormValues((prev) => ({
-              ...prev,
-              gamePath: payload,
-            }));
-          }
+      unlisten = await listen("selected_folder", ({ payload }: Event<string | null>) => {
+        if (payload) {
+          setFormValues((prev) => ({
+            ...prev,
+            gamePath: payload,
+          }));
         }
-      );
+      });
     })();
 
     return () => {
@@ -66,48 +63,32 @@ export default function AddGameModal() {
   }
 
   async function onSubmit(evt: React.FormEvent<HTMLFormElement>) {
-    console.log("submitting");
     evt.preventDefault();
     try {
       await formSchema.validate(formValues, { abortEarly: false });
     } catch (err) {
-      const error = err as yup.ValidationError;
-      console.error(error);
+      /* empty */
     }
 
-    await addNewGame(
-      formValues.gameName,
-      formValues.gamePath,
-      Number(formValues.maxSaveBackups)
-    );
+    await addNewGame(formValues.gameName, formValues.gamePath, Number(formValues.maxSaveBackups));
 
     dispatch(setGameModalOpen(false));
   }
 
   return (
     <div
-      className={`absolute w-full h-full flex justify-center items-center transition-all bg-slate-900 ${
-        createGameModalOpen
-          ? "bg-opacity-60"
-          : "bg-opacity-0 pointer-events-none"
+      className={`absolute w-full h-full flex justify-center items-center transition-all z-10 bg-slate-900 ${
+        createGameModalOpen ? "bg-opacity-60" : "bg-opacity-0 pointer-events-none"
       }`}
     >
       <section
-        className={`min-w-40 max-w-96 h-auto border rounded-lg p-5 lg:p-20 ${
+        className={`min-w-40 max-w-96 h-auto border rounded-lg p-5 lg:p-20 bg-slate-900 ${
           createGameModalOpen ? "visible" : "hidden"
         }`}
       >
-        <h1 className="text-white border-b mb-5">Add Game</h1>
-        <form
-          className="flex flex-col gap-2"
-          onSubmit={onSubmit}
-          onChange={onChange}
-        >
-          <Input
-            placeholder="Game Name"
-            name="gameName"
-            value={formValues.gameName}
-          />
+        <h1 className="text-white border-b mb-5 text-center text-xl font-bold">Add Game</h1>
+        <form className="flex flex-col gap-2" onSubmit={onSubmit} onChange={onChange}>
+          <Input placeholder="Game Name" name="gameName" value={formValues.gameName} />
           <Input
             placeholder="Max Save Backups"
             type="number"
@@ -125,9 +106,7 @@ export default function AddGameModal() {
             >
               Choose save folder
             </Button>
-            {formValues.gamePath && (
-              <code className="text-white truncate">{formValues.gamePath}</code>
-            )}
+            {formValues.gamePath && <code className="text-white truncate">{formValues.gamePath}</code>}
           </section>
 
           <div className="flex gap-2 justify-center">

@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{
+    borrow::Borrow,
     path::Path,
     sync::{Arc, Mutex, OnceLock, RwLock},
 };
@@ -14,7 +15,7 @@ mod file_handler;
 mod file_listener;
 
 lazy_static::lazy_static! {
-    pub static ref DIRS: directories::ProjectDirs = directories::ProjectDirs::from("", "Biddydev", "SaveScum").unwrap();
+    pub static ref DIRS: directories::ProjectDirs = directories::ProjectDirs::from("", "Biddydev", "SaveSentry").unwrap();
 }
 
 pub static WINDOW: OnceLock<Window> = OnceLock::new();
@@ -40,7 +41,9 @@ fn add_game(
         game_name: game_name.clone(),
         save_folder_path,
         max_save_backups,
+        watcher_enabled: true,
         save_files: vec![],
+        id: uuid::Uuid::new_v4().to_string(),
     };
 
     let mut config = config.write().map_err(|e| e.to_string())?;
@@ -85,8 +88,35 @@ fn open_folder_browser(window: tauri::Window) {
     });
 }
 
+#[tauri::command]
+fn restore_save(
+    game_id: String,
+    save_id: String,
+    config: tauri::State<'_, ConfigState>,
+    file_watcher: tauri::State<'_, Mutex<file_listener::FileWatcher>>,
+) -> Result<(), String> {
+    let mut watcher = file_watcher.lock().map_err(|e| e.to_string())?;
+    file_handler::restore_save_directory(config.inner(), &game_id, &save_id, &mut watcher)
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+fn delete_save(
+    game_id: String,
+    save_id: String,
+    config: tauri::State<'_, ConfigState>,
+) -> Result<(), String> {
+    file_handler::delete_save(config.inner(), &game_id, &save_id).map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 fn main() -> anyhow::Result<()> {
-    let program_config = Arc::new(RwLock::new(config::ProgramConfig::load()?));
+    let program_config = Arc::new(RwLock::new(
+        config::ConfigVersion::load()?.perform_migrations()?,
+    ));
 
     let quit = CustomMenuItem::new("quit", "Quit");
     let toggle_show = CustomMenuItem::new("toggle_show", "Restore/Hide");
@@ -129,7 +159,9 @@ fn main() -> anyhow::Result<()> {
             add_game,
             get_config,
             change_config,
-            open_folder_browser
+            open_folder_browser,
+            restore_save,
+            delete_save
         ])
         .manage(program_config.clone())
         .manage(Mutex::new(file_listener::FileWatcher::new(program_config)?))

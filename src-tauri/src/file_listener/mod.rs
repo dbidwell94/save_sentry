@@ -75,6 +75,9 @@ impl FileWatcher {
         let config = config.read().map_err(|e| anyhow::anyhow!(e.to_string()))?;
 
         for game in config.games.values() {
+            if !game.watcher_enabled {
+                continue;
+            }
             watcher.watch(
                 Path::new(&game.save_folder_path),
                 notify::RecursiveMode::Recursive,
@@ -87,6 +90,14 @@ impl FileWatcher {
     pub fn watch_new_game(&mut self, save_folder_path: &Path) -> anyhow::Result<()> {
         self.watcher
             .watch(save_folder_path, notify::RecursiveMode::Recursive)?;
+
+        Ok(())
+    }
+
+    pub fn stop_watching(&mut self, save_folder_path: &Path) -> anyhow::Result<()> {
+        self.watcher
+            .unwatch(save_folder_path)
+            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
 
         Ok(())
     }
