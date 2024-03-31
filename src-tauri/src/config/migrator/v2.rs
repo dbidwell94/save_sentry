@@ -28,7 +28,6 @@ impl Default for ProgramConfig {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, TS)]
-#[ts(export)]
 #[serde(rename_all = "camelCase")]
 pub struct GameConfig {
     pub game_name: String,
@@ -39,7 +38,6 @@ pub struct GameConfig {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, TS)]
-#[ts(export)]
 #[ts(rename_all = "camelCase")]
 pub struct SaveFileMetadata {
     pub created_at: String,
