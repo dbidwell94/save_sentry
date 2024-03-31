@@ -1,3 +1,7 @@
 #!/usr/bin/env sh
 
-npm run bindings:generate
+scriptLocation=$(readlink -f "$0")
+startDir=$(dirname "$scriptLocation")
+
+cd "$startDir/.."
+./generateBindings.sh
