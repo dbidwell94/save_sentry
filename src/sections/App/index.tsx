@@ -9,7 +9,12 @@ import { listen } from "@tauri-apps/api/event";
 import AddGameModal from "@src/components/AddGameModal";
 import { Routes, Route } from "react-router-dom";
 import GameDetails from "./GameDetails";
-import { Container } from "@mui/material";
+import styled from "@emotion/styled";
+
+const AppContainer = styled.div`
+  width: 100%;
+  height: 100%;
+`;
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -37,14 +42,14 @@ export default function App() {
   }, []);
 
   return (
-    <div className="w-full h-full bg-slate-800 flex flex-col justify-between relative">
-      <AddGameModal />
+    <AppContainer>
+      {/* <AddGameModal /> */}
       <Navbar />
       <Routes>
         <Route path="/game-details/:gameId" element={<GameDetails />} />
         <Route path="/" element={<GamesOverview />} />
       </Routes>
       <Footer />
-    </div>
+    </AppContainer>
   );
 }
