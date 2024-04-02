@@ -9,6 +9,7 @@ import { listen } from "@tauri-apps/api/event";
 import AddGameModal from "@src/components/AddGameModal";
 import { Routes, Route } from "react-router-dom";
 import GameDetails from "./GameDetails";
+import { Container } from "@mui/material";
 
 export default function App() {
   const dispatch = useAppDispatch();
