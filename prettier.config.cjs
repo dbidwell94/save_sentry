@@ -5,7 +5,6 @@ const config = {
   trailingComma: "all",
   quoteProps: "consistent",
   tabWidth: 2,
-  
 };
 
 // eslint-disable-next-line no-undef
