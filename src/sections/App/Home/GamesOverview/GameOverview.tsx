@@ -18,16 +18,19 @@ const DataContainer = styled(Box)`
 const AnimatedCircle = styled(Circle, { shouldForwardProp: (props) => props !== "watcherEnabled" })<{
   watcherEnabled: boolean;
 }>`
-  animation: ${({ watcherEnabled }) => (watcherEnabled ? "pulse 1s infinite" : "none")};
+  animation: ${({ watcherEnabled }) => (watcherEnabled ? "pulse 1.5s infinite" : "none")};
+  z-index: 1;
   @keyframes pulse {
     0% {
       transform: scale(1);
     }
     50% {
-      transform: scale(1.25);
+      transform: scale(2);
+      opacity: 0;
     }
     100% {
-      transform: scale(1);
+      transform: scale(2);
+      opacity: 0;
     }
   }
 `;
@@ -67,8 +70,12 @@ export default function GameOverview({ gameConfig }: GameOverviewProps) {
           <Typography variant="button">Options</Typography>
           <KeyboardArrowDown />
         </Button>
+
         <Tooltip title={`${watcherEnabled ? "Watching" : "Not watching"} game save location`}>
-          <AnimatedCircle watcherEnabled={watcherEnabled} color={watcherEnabled ? "success" : "error"} />
+          <Box position={"relative"} display={"flex"}>
+            <Circle color={watcherEnabled ? "success" : "error"} sx={{ position: "absolute" }} />
+            <AnimatedCircle watcherEnabled={watcherEnabled} color={watcherEnabled ? "success" : "error"} />
+          </Box>
         </Tooltip>
       </Box>
     </GameOverviewContainer>

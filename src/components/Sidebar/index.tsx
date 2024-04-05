@@ -55,6 +55,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
 });
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" })(({ theme, open }) => ({
+  position: "absolute",
   width: drawerWidth,
   flexShrink: 0,
   whiteSpace: "nowrap",
@@ -67,6 +68,18 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" 
     ...closedMixin(theme),
     "& .MuiDrawer-paper": closedMixin(theme),
   }),
+}));
+
+/**
+ * This "GhostDrawer" is used to keep the layout consistent when the sidebar is closed.
+ * It is a placeholder that takes up the same space as the sidebar, has no content, and just pushes over the main content.
+ */
+const GhostDrawer = styled("div")(({ theme }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  boxSizing: "border-box",
+  ...closedMixin(theme),
 }));
 
 const topSidebarOptions: SidebarOption[] = [
@@ -89,34 +102,42 @@ export default function Sidebar() {
     setOpen((o) => !o);
   }
 
+  function onMenuLinkPressed() {
+    setOpen(false);
+  }
+
   return (
-    <Drawer variant="permanent" open={open}>
-      <DrawerHeader open={open}>
-        <IconButton onClick={handleDrawerOpenToggle}>{open ? <ChevronLeftIcon /> : <MenuIcon />}</IconButton>
-      </DrawerHeader>
-      <Divider />
-      {topSidebarOptions.map((option) => {
-        return (
-          <ListItem key={option.label} disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              component={NavLink}
-              to={option.path}
-              sx={{ minHeight: 48, px: 2.5, justifyContent: open ? "initial" : "center" }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : "auto",
-                  justifyContent: "center",
-                }}
+    <>
+      <GhostDrawer />
+      <Drawer variant="permanent" open={open}>
+        <DrawerHeader open={open}>
+          <IconButton onClick={handleDrawerOpenToggle}>{open ? <ChevronLeftIcon /> : <MenuIcon />}</IconButton>
+        </DrawerHeader>
+        <Divider />
+        {topSidebarOptions.map((option) => {
+          return (
+            <ListItem key={option.label} disablePadding sx={{ display: "block" }}>
+              <ListItemButton
+                component={NavLink}
+                to={option.path}
+                sx={{ minHeight: 48, px: 2.5, justifyContent: open ? "initial" : "center" }}
+                onClick={onMenuLinkPressed}
               >
-                <option.icon />
-              </ListItemIcon>
-              <ListItemText primary={option.label} sx={{ opacity: open ? 1 : 0 }} />
-            </ListItemButton>
-          </ListItem>
-        );
-      })}
-    </Drawer>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  <option.icon />
+                </ListItemIcon>
+                <ListItemText primary={option.label} sx={{ opacity: open ? 1 : 0 }} />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+      </Drawer>
+    </>
   );
 }
