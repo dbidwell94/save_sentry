@@ -4,7 +4,6 @@ import { useAppDispatch } from "@src/store";
 import { updateGames } from "@state/configReducer";
 import styled from "@emotion/styled";
 import useTauriListen from "@src/hooks/useTauriListen";
-import { ProgramConfig } from "@src/tauriTypes/ProgramConfig";
 import { Route, Routes } from "react-router-dom";
 import Home from "./Home";
 import Game from "./Game";
@@ -25,8 +24,10 @@ export default function App() {
     });
   }, []);
 
-  useTauriListen<ProgramConfig>("configUpdated", (data) => {
-    dispatch(updateGames(data));
+  useTauriListen<void>("configUpdated", () => {
+    getConfg().then((config) => {
+      void dispatch(updateGames(config));
+    });
   });
 
   return (

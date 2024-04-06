@@ -22,5 +22,5 @@ export default function useTauriListen<T>(event: string, callback: (data: T) => 
         unlisten();
       }
     };
-  }, []);
+  }, [event, callback]);
 }

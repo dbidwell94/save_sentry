@@ -5,6 +5,7 @@ import { Box, Divider, Grid, Paper, styled } from "@mui/material";
 import AddGameButton from "./AddGameButton";
 import SearchAndFilter, { SortOption, sort } from "./SearchAndFilter";
 import { useMemo, useState } from "react";
+import AddGameModal from "./AddGameModal";
 
 const GamesOverviewContainer = styled(Paper)`
   width: 100%;
@@ -20,6 +21,7 @@ const ScrollContainer = styled(Box)`
 `;
 
 const GridContainer = styled(Grid)`
+  min-height: 100%;
   height: max-content;
 `;
 
@@ -27,6 +29,7 @@ export default function GamesOverview() {
   const config = useAppSelector(configSelector);
   const [searchText, setSearchText] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>(SortOption.None);
+  const [addGameModalOpen, setAddGameModalOpen] = useState(false);
 
   const games = useMemo(() => {
     if (!searchText) return Object.values(config.games);
@@ -37,6 +40,7 @@ export default function GamesOverview() {
 
   return (
     <>
+      <AddGameModal open={addGameModalOpen} onClose={() => setAddGameModalOpen(false)} />
       <GamesOverviewContainer>
         <SearchAndFilter
           setSearchText={setSearchText}
@@ -47,7 +51,12 @@ export default function GamesOverview() {
         <ScrollContainer>
           <GridContainer container spacing={2}>
             <Grid item xs={5} md={4} xl={2}>
-              <AddGameButton />
+              <AddGameButton
+                onClick={(e) => {
+                  e.preventDefault();
+                  setAddGameModalOpen(true);
+                }}
+              />
             </Grid>
             {games.map((gameConfig) => (
               <Grid item key={gameConfig.id} xs={5} md={4} xl={2}>

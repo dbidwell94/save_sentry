@@ -1,12 +1,39 @@
-import { Box, Button, Divider, Paper, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Menu,
+  MenuList,
+  Paper,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import { GameConfig } from "@tauri/GameConfig";
-import { Circle, KeyboardArrowDown } from "@mui/icons-material";
+import {
+  Circle,
+  KeyboardArrowDown,
+  Delete as DeleteIcon,
+  Analytics as AnalyticsIcon,
+  Close as CloseIcon,
+  Check as CheckIcon,
+} from "@mui/icons-material";
+import { useState } from "react";
+import MenuIcon from "@src/components/MenuIcon";
+import { useNavigate } from "react-router-dom";
+import { toggleGameFileWatcher } from "@src/api";
 
 export const GameOverviewContainer = styled(Paper)`
   width: 100%;
-  height: 100%;
+  min-height: ${({ theme }) => theme.spacing(30)};
+  max-height: 100%;
   padding: ${({ theme }) => theme.spacing(2)};
+  display: flex;
+  flex-direction: column;
 `;
 
 const DataContainer = styled(Box)`
@@ -35,6 +62,14 @@ const AnimatedCircle = styled(Circle, { shouldForwardProp: (props) => props !== 
   }
 `;
 
+const AnimatedArrow = styled(KeyboardArrowDown, { shouldForwardProp: (props) => props !== "open" })<{
+  open?: boolean;
+}>`
+  transition: transform 0.3s;
+  transform: rotate(${({ open }) => (open ? "180deg" : "0deg")});
+  margin-left: ${({ theme }) => theme.spacing(1)};
+`;
+
 interface GameOverviewProps {
   gameConfig: GameConfig;
 }
@@ -42,13 +77,51 @@ interface GameOverviewProps {
 export default function GameOverview({ gameConfig }: GameOverviewProps) {
   const { gameName, maxSaveBackups, watcherEnabled, saveFiles } = gameConfig;
   const theme = useTheme();
+  const [optionsAnchor, setOptionsAnchor] = useState<null | HTMLElement>(null);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [deleteWarningOpen, setDeleteWarningOpen] = useState(false);
+  const navigate = useNavigate();
 
   function openOptionsMenu(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
     e.preventDefault();
+    setOptionsAnchor(e.currentTarget);
+    setOptionsOpen(true);
   }
+
+  function closeOptionsMenu() {
+    setOptionsAnchor(null);
+    setOptionsOpen(false);
+  }
+
+  async function handleEnableDisable() {
+    await toggleGameFileWatcher(gameConfig.id, !watcherEnabled);
+    closeOptionsMenu();
+  }
+
+  function handleDelete() {}
 
   return (
     <GameOverviewContainer elevation={10}>
+      {/* Delete dialog */}
+      <Dialog open={deleteWarningOpen} onClose={() => setDeleteWarningOpen(false)}>
+        <DialogTitle>Are you sure?</DialogTitle>
+        <Divider />
+        <DialogContent>
+          Are you are about to delete this game config. This will delete all save backups you have. This will NOT delete
+          the game save file in the game&apos;s save directory.
+          <br />
+          <br />
+          You can add this game again by clicking &quot;Add Game&quot; on the game overview screen.
+        </DialogContent>
+        <DialogActions>
+          <Button color="error" onClick={handleDelete}>
+            Delete
+          </Button>
+          <Button onClick={() => setDeleteWarningOpen(false)}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+      {/* End Delete dialog */}
+
       <Typography variant="h5" textAlign={"center"}>
         {gameName}
       </Typography>
@@ -63,15 +136,48 @@ export default function GameOverview({ gameConfig }: GameOverviewProps) {
         <Typography>{saveFiles.length}</Typography>
       </DataContainer>
 
+      <DataContainer>
+        <Typography>Last saved:</Typography>
+        <Typography>
+          {saveFiles.length > 0 ? new Date(saveFiles[saveFiles.length - 1]?.createdAt).toLocaleString() : "Never"}
+        </Typography>
+      </DataContainer>
+
       <Divider sx={{ marginBottom: theme.spacing(1) }} />
 
-      <Box display="flex" alignItems="flex-end" justifyContent="space-between" width="100%">
+      <Box display="flex" flexGrow={1} alignItems="flex-end" justifyContent="space-between" width="100%" height="100%">
         <Button variant="contained" onClick={openOptionsMenu}>
           <Typography variant="button">Options</Typography>
-          <KeyboardArrowDown />
+          <AnimatedArrow open={optionsOpen} />
         </Button>
+        <Menu
+          open={optionsOpen}
+          onClose={closeOptionsMenu}
+          anchorEl={optionsAnchor}
+          slotProps={{ paper: { elevation: 20 } }}
+        >
+          <MenuList>
+            <MenuIcon icon={AnalyticsIcon} text="Details" onClick={() => navigate(`/game/${gameConfig.id}`)} />
+            <Divider />
+            {watcherEnabled ? (
+              <MenuIcon icon={CloseIcon} text="Disable" onClick={handleEnableDisable} />
+            ) : (
+              <MenuIcon text="Enable" onClick={handleEnableDisable} icon={CheckIcon} />
+            )}
+            <Divider />
+            <MenuIcon
+              color="error"
+              icon={DeleteIcon}
+              text="Delete"
+              onClick={() => {
+                setDeleteWarningOpen(true);
+                closeOptionsMenu();
+              }}
+            />
+          </MenuList>
+        </Menu>
 
-        <Tooltip title={`${watcherEnabled ? "Watching" : "Not watching"} game save location`}>
+        <Tooltip title={`Game save watcher is ${watcherEnabled ? "active" : "inactive"}`}>
           <Box position={"relative"} display={"flex"}>
             <Circle color={watcherEnabled ? "success" : "error"} sx={{ position: "absolute" }} />
             <AnimatedCircle watcherEnabled={watcherEnabled} color={watcherEnabled ? "success" : "error"} />
