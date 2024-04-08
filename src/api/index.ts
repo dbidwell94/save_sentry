@@ -28,3 +28,7 @@ export async function restoreSaveFile(gameId: string, saveFileId: string) {
 export async function deleteSaveFile(gameId: string, saveFileId: string) {
   return await invoke("delete_save", { gameId, saveId: saveFileId });
 }
+
+export async function toggleGameFileWatcher(gameId: string, enabled: boolean) {
+  return await invoke("toggle_game_file_watcher", { gameId, enabled });
+}

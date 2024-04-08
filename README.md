@@ -11,7 +11,7 @@ Did your save file get corrupted? Whelp, that sucks. But fret not: just quit the
 
 - [x] Add system to calculate hash of save folder to avoid unneeded duplicated saves
 - [ ] Visual config editor
-- [ ] Use GUI to restore save files
+- [x] Use GUI to restore save files
 - [ ] Better UI
 - [x] (Stretch) able to run `SaveSentry` in the background without showing a window
 

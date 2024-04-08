@@ -2,7 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{
-    borrow::Borrow,
     path::Path,
     sync::{Arc, Mutex, OnceLock, RwLock},
 };
@@ -31,6 +30,19 @@ fn add_game(
     file_watcher: tauri::State<'_, Mutex<file_listener::FileWatcher>>,
     window: tauri::Window,
 ) -> Result<(), String> {
+    let mut config = config.write().map_err(|e| e.to_string())?;
+
+    // ensure this folder path has not already been added to the config
+    if config
+        .games
+        .values()
+        .any(|g| g.save_folder_path == save_folder_path)
+    {
+        return Err("This save path has already been added".to_string());
+    }
+
+    // ensure this save path has not already been added to the config
+
     file_watcher
         .lock()
         .unwrap()
@@ -45,8 +57,6 @@ fn add_game(
         save_files: vec![],
         id: uuid::Uuid::new_v4().to_string(),
     };
-
-    let mut config = config.write().map_err(|e| e.to_string())?;
 
     config.games.insert(game_name, game_config);
     config
@@ -113,6 +123,48 @@ fn delete_save(
     Ok(())
 }
 
+#[tauri::command]
+fn toggle_game_file_watcher(
+    game_id: String,
+    enabled: bool,
+    config: tauri::State<'_, ConfigState>,
+    file_watcher: tauri::State<'_, Mutex<file_listener::FileWatcher>>,
+    window: tauri::Window,
+) -> Result<(), String> {
+    let mut watcher = file_watcher.lock().map_err(|e| e.to_string())?;
+    let mut config = config.write().map_err(|e| e.to_string())?;
+
+    let game_config = config
+        .games
+        .values_mut()
+        .find(|g| g.id == game_id)
+        .ok_or_else(|| "Unable to find game config")?;
+
+    if enabled == game_config.watcher_enabled {
+        return Ok(());
+    }
+
+    let game_path = Path::new(&game_config.save_folder_path);
+
+    if enabled {
+        watcher
+            .watch_new_game(game_path)
+            .map_err(|e| e.to_string())?;
+    } else {
+        watcher
+            .stop_watching(game_path)
+            .map_err(|e| e.to_string())?;
+    }
+
+    game_config.watcher_enabled = enabled;
+    config.save().map_err(|e| e.to_string())?;
+    window
+        .emit("configUpdated", ())
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 fn main() -> anyhow::Result<()> {
     let program_config = Arc::new(RwLock::new(
         config::ConfigVersion::load()?.perform_migrations()?,
@@ -161,7 +213,8 @@ fn main() -> anyhow::Result<()> {
             change_config,
             open_folder_browser,
             restore_save,
-            delete_save
+            delete_save,
+            toggle_game_file_watcher
         ])
         .manage(program_config.clone())
         .manage(Mutex::new(file_listener::FileWatcher::new(program_config)?))
