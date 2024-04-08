@@ -1,6 +1,6 @@
 [package]
 name = "save_sentry"
-version = "0.3.0"
+version = "0.3.1"
 description = "Allow save scumming in games that don't allow multiple save states"
 authors = ["Devin Bidwell <dbidwell94@biddydev.com>"]
 edition = "2021"
