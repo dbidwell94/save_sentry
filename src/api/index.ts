@@ -17,6 +17,10 @@ export async function addNewGame(gameName: string, saveFolderPath: string, maxSa
   });
 }
 
+export async function removeGame(gameId: string): Promise<void> {
+  return await invoke("remove_game", { gameId });
+}
+
 export async function openFolderPicker() {
   return await invoke("open_folder_browser");
 }

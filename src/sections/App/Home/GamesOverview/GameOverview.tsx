@@ -25,7 +25,7 @@ import {
 import { useState } from "react";
 import MenuIcon from "@src/components/MenuIcon";
 import { useNavigate } from "react-router-dom";
-import { toggleGameFileWatcher } from "@src/api";
+import { removeGame, toggleGameFileWatcher } from "@src/api";
 
 export const GameOverviewContainer = styled(Paper)`
   width: 100%;
@@ -98,7 +98,11 @@ export default function GameOverview({ gameConfig }: GameOverviewProps) {
     closeOptionsMenu();
   }
 
-  function handleDelete() {}
+  async function handleDelete(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    e.preventDefault();
+    await removeGame(gameConfig.id);
+    setDeleteWarningOpen(false);
+  }
 
   return (
     <GameOverviewContainer elevation={10}>
