@@ -273,6 +273,31 @@ pub fn restore_save_directory(
     Ok(())
 }
 
+pub fn delete_backup_directory(
+    program_config: &Arc<RwLock<ProgramConfig>>,
+    game_id: &str,
+) -> anyhow::Result<()> {
+    let config = program_config
+        .read()
+        .map_err(|_| anyhow::anyhow!("Unable to aquire read lock on program config"))?;
+
+    let game_config = config
+        .games
+        .values()
+        .find(|g| g.id == game_id)
+        .ok_or_else(|| {
+            anyhow::anyhow!("Game config does not exist. This is an unexpected error")
+        })?;
+
+    let save_folder_path = DIRS.data_dir().join(&game_config.game_name);
+
+    if save_folder_path.exists() {
+        std::fs::remove_dir_all(save_folder_path)?;
+    }
+
+    Ok(())
+}
+
 pub fn delete_save(
     program_config: &Arc<RwLock<ProgramConfig>>,
     game_id: &str,
@@ -286,7 +311,9 @@ pub fn delete_save(
         .games
         .iter_mut()
         .find(|(_, g)| (**g).id == game_id)
-        .ok_or_else(|| anyhow::anyhow!("Game config does not exist. This is an unexpected error"))?;
+        .ok_or_else(|| {
+            anyhow::anyhow!("Game config does not exist. This is an unexpected error")
+        })?;
 
     let save_file_index = game
         .save_files

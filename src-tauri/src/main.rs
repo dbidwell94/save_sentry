@@ -6,7 +6,6 @@ use std::{
     sync::{Arc, Mutex, OnceLock, RwLock},
 };
 use tauri::api::dialog;
-
 use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayMenu, Window};
 
 mod config;
@@ -63,6 +62,43 @@ fn add_game(
         .save()
         .map_err(|_| "Failed to save config".to_string())?;
 
+    window
+        .emit("configUpdated", ())
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+fn remove_game(
+    game_id: String,
+    config_state: tauri::State<'_, ConfigState>,
+    file_watcher: tauri::State<'_, Mutex<file_listener::FileWatcher>>,
+    window: tauri::Window,
+) -> Result<(), String> {
+    {
+        let config = config_state.read().map_err(|e| e.to_string())?;
+        let game_config = config
+            .games
+            .values()
+            .find(|g| g.id == game_id)
+            .ok_or_else(|| "Unable to find game config")?;
+        let mut file_watcher = file_watcher.lock().map_err(|e| e.to_string())?;
+
+        file_watcher
+            .stop_watching(Path::new(&game_config.save_folder_path))
+            .map_err(|e| e.to_string())?;
+    }
+
+    // delete all backed up save files
+    file_handler::delete_backup_directory(&config_state, &game_id).map_err(|e| e.to_string())?;
+
+    let mut config = config_state.write().map_err(|e| e.to_string())?;
+
+    config.games.retain(|_, g| g.id != game_id);
+    config
+        .save()
+        .map_err(|_| "Failed to save config".to_string())?;
     window
         .emit("configUpdated", ())
         .map_err(|e| e.to_string())?;
@@ -209,6 +245,7 @@ fn main() -> anyhow::Result<()> {
         })
         .invoke_handler(tauri::generate_handler![
             add_game,
+            remove_game,
             get_config,
             change_config,
             open_folder_browser,
