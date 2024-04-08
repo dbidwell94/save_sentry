@@ -6,6 +6,8 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  ClickAwayListener,
+  Box,
 } from "@mui/material";
 import { CSSObject, Theme, styled } from "@mui/material/styles";
 import {
@@ -21,6 +23,7 @@ interface SidebarOption {
   label: string;
   icon: typeof HomeIcon;
   path: string;
+  disabled?: boolean;
 }
 
 const drawerWidth = 240;
@@ -92,6 +95,7 @@ const topSidebarOptions: SidebarOption[] = [
     label: "Settings",
     icon: SettingsIcon,
     path: "/settings",
+    disabled: true,
   },
 ];
 
@@ -110,33 +114,38 @@ export default function Sidebar() {
     <>
       <GhostDrawer />
       <Drawer variant="permanent" open={open}>
-        <DrawerHeader open={open}>
-          <IconButton onClick={handleDrawerOpenToggle}>{open ? <ChevronLeftIcon /> : <MenuIcon />}</IconButton>
-        </DrawerHeader>
-        <Divider />
-        {topSidebarOptions.map((option) => {
-          return (
-            <ListItem key={option.label} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                component={NavLink}
-                to={option.path}
-                sx={{ minHeight: 48, px: 2.5, justifyContent: open ? "initial" : "center" }}
-                onClick={onMenuLinkPressed}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  <option.icon />
-                </ListItemIcon>
-                <ListItemText primary={option.label} sx={{ opacity: open ? 1 : 0 }} />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
+        <ClickAwayListener onClickAway={() => setOpen(false)}>
+          <Box height="100%" width="100%">
+            <DrawerHeader open={open}>
+              <IconButton onClick={handleDrawerOpenToggle}>{open ? <ChevronLeftIcon /> : <MenuIcon />}</IconButton>
+            </DrawerHeader>
+            <Divider />
+            {topSidebarOptions.map((option) => {
+              return (
+                <ListItem key={option.label} disablePadding sx={{ display: "block" }}>
+                  <ListItemButton
+                    component={NavLink}
+                    to={option.path}
+                    sx={{ minHeight: 48, px: 2.5, justifyContent: open ? "initial" : "center" }}
+                    onClick={onMenuLinkPressed}
+                    disabled={option.disabled}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 3 : "auto",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <option.icon />
+                    </ListItemIcon>
+                    <ListItemText primary={option.label} sx={{ opacity: open ? 1 : 0 }} />
+                  </ListItemButton>
+                </ListItem>
+              );
+            })}
+          </Box>
+        </ClickAwayListener>
       </Drawer>
     </>
   );
