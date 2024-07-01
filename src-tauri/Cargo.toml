@@ -28,7 +28,7 @@ chrono = "0.4.35"
 sha2 = "0.10.8"
 base64 = "0.22.0"
 uuid = { version = "1.8.0", features = ["v4"] }
-ts-rs = "8.1.0" # Generate typescript bindings
+ts-rs = "9.0.1" # Generate typescript bindings
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
